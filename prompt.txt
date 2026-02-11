@@ -1,0 +1,1349 @@
+пожалуйста, разработай на nuxt js веб-интерфейс для системы Неваляшка, который:
+
+1. может подключать и отключать ноды системы, которые заданы с помощью URL
+2. для каждой ноды показать список доступных на ней модулей, сервисов и конфигов, а также дать возможность добавлять и удалять их
+3. показать и отредактировать список подключенных к ноде реестров
+4. показать реестр самой ноды и содержащиеся в нём модули и конфиги
+
+использовать openapi спецификацию YAML:
+
+components:
+  responses: {}
+  schemas:
+    ActMod:
+      description: Подключаемый модуль системы
+      properties:
+        base64:
+          description: Программный код модуля (Elixir => base64)
+          type: string
+        config_default:
+          description: Конфигурация по умолчанию
+          type: object
+        from_reg:
+          description: URL реестра, откуда получен модуль
+          type: string
+        id:
+          title: ActMod_ID
+          type: string
+      title: ActMod
+      type: object
+    ActModConf:
+      description: Конфигурация
+      properties:
+        id:
+          title: ActModConf_ID
+          type: string
+        params:
+          description: Параметры
+          type: object
+      title: ActModConf
+      type: object
+    ActModConf_ID:
+      description: ИД используемой конфигурации (можно не указывать, тогда создастся автоматически)
+      title: ActModConf_ID
+      type: string
+    ActMod_ID:
+      description: ИД используемого модуля
+      title: ActMod_ID
+      type: string
+    ActServ:
+      description: Запускаемый сервис системы
+      properties:
+        channels:
+          description: Каналы сервиса (входные и выходные). Следует иметь ввиду, что порядок указания каналов может быть важен для модуля
+          properties:
+            in:
+              description: Входные каналы
+              items:
+                description: Канал
+                title: Channel
+                type: string
+              type: array
+            out:
+              description: Выходные каналы
+              items:
+                description: Канал
+                title: Channel
+                type: string
+              type: array
+          title: Service_channels
+          type: object
+        config:
+          description: ИД используемой конфигурации (можно не указывать, тогда создастся автоматически)
+          title: ActModConf_ID
+          type: string
+        config_data:
+          description: Установленные параметры
+          type: object
+        id:
+          title: ActServ_ID
+          type: string
+        module:
+          description: ИД используемого модуля
+          title: ActMod_ID
+          type: string
+      title: ActServ
+      type: object
+    ActServ_ID:
+      title: ActServ_ID
+      type: string
+    Channel:
+      description: Канал
+      title: Channel
+      type: string
+    OK_response:
+      description: OK
+      title: OK_response
+      type: string
+    Register:
+      description: Внешний подключаемый реестр модулей, конфигураций и энтити
+      properties:
+        id:
+          title: Register_ID
+          type: string
+        url:
+          description: URL подключаемого реестра
+          type: object
+      title: Register
+      type: object
+    Register_ID:
+      title: Register_ID
+      type: string
+    Service_channels:
+      description: Каналы сервиса (входные и выходные). Следует иметь ввиду, что порядок указания каналов может быть важен для модуля
+      properties:
+        in:
+          description: Входные каналы
+          items:
+            description: Канал
+            title: Channel
+            type: string
+          type: array
+        out:
+          description: Выходные каналы
+          items:
+            description: Канал
+            title: Channel
+            type: string
+          type: array
+      title: Service_channels
+      type: object
+info:
+  title: Неваляшка
+  version: '1.0'
+openapi: 3.0.0
+paths:
+  /node/config/del/{eid}:
+    post:
+      callbacks: {}
+      deprecated: false
+      operationId: Удаление объекта типа ActModConf с указанным ИД
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActModConf_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Конфигурация
+                properties:
+                  id:
+                    title: ActModConf_ID
+                    type: string
+                  params:
+                    description: Параметры
+                    type: object
+                title: ActModConf
+                type: object
+          description: Удалённый объект
+      tags: []
+  /node/config/list:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Список доступных объектов типа ActModConf
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  description: Конфигурация
+                  properties:
+                    id:
+                      title: ActModConf_ID
+                      type: string
+                    params:
+                      description: Параметры
+                      type: object
+                  title: ActModConf
+                  type: object
+                type: array
+          description: Массив объектов
+      tags: []
+  /node/config/put/{eid}:
+    post:
+      callbacks: {}
+      deprecated: false
+      operationId: Сохранение объекта типа ActModConf с указанным ИД
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActModConf_ID
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Конфигурация
+              properties:
+                id:
+                  title: ActModConf_ID
+                  type: string
+                params:
+                  description: Параметры
+                  type: object
+              title: ActModConf
+              type: object
+        description: Объект
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: ИД объекта
+                title: ActModConf_ID
+                type: string
+          description: Сохранённый ИД
+        '401':
+          content:
+            application/json:
+              schema:
+                description: ИД объекта
+                title: ActModConf_ID
+                type: string
+          description: Не удалось сохранить объект с таким ИД
+      tags: []
+  /node/config/read/{eid}:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Получение объекта типа ActModConf по его идентификатору
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActModConf_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Конфигурация
+                properties:
+                  id:
+                    title: ActModConf_ID
+                    type: string
+                  params:
+                    description: Параметры
+                    type: object
+                title: ActModConf
+                type: object
+          description: Объект
+      tags: []
+  /node/module/add/{reg}/{mod}:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Добавление модуля из указанного реестра на текущую ноду
+      parameters:
+        - description: ИД реестра
+          in: path
+          name: reg
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActServ_ID
+            type: string
+        - description: ИД добавляемого модуля
+          in: path
+          name: mod
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActServ_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Подключаемый модуль системы
+                properties:
+                  base64:
+                    description: Программный код модуля (Elixir => base64)
+                    type: string
+                  config_default:
+                    description: Конфигурация по умолчанию
+                    type: object
+                  from_reg:
+                    description: URL реестра, откуда получен модуль
+                    type: string
+                  id:
+                    title: ActMod_ID
+                    type: string
+                title: ActMod
+                type: object
+          description: Добавленный модуль
+      tags: []
+  /node/module/cp/{modfr}/{modto}:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Копирование модуля с новым именем
+      parameters:
+        - description: ИД модуля для копирования
+          in: path
+          name: modfr
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActServ_ID
+            type: string
+        - description: Новый ИД для копии модуля
+          in: path
+          name: modto
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActServ_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Подключаемый модуль системы
+                properties:
+                  base64:
+                    description: Программный код модуля (Elixir => base64)
+                    type: string
+                  config_default:
+                    description: Конфигурация по умолчанию
+                    type: object
+                  from_reg:
+                    description: URL реестра, откуда получен модуль
+                    type: string
+                  id:
+                    title: ActMod_ID
+                    type: string
+                title: ActMod
+                type: object
+          description: Скопированный модуль
+      tags: []
+  /node/module/list:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Показать модули, доступные на текущей ноде
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  description: Подключаемый модуль системы
+                  properties:
+                    base64:
+                      description: Программный код модуля (Elixir => base64)
+                      type: string
+                    config_default:
+                      description: Конфигурация по умолчанию
+                      type: object
+                    from_reg:
+                      description: URL реестра, откуда получен модуль
+                      type: string
+                    id:
+                      title: ActMod_ID
+                      type: string
+                  title: ActMod
+                  type: object
+                type: array
+          description: Модули
+      tags: []
+  /node/module/onreg/{reg}:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Показать модули, доступные из указанного реестра
+      parameters:
+        - description: ИД реестра
+          in: path
+          name: reg
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActServ_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  description: Подключаемый модуль системы
+                  properties:
+                    base64:
+                      description: Программный код модуля (Elixir => base64)
+                      type: string
+                    config_default:
+                      description: Конфигурация по умолчанию
+                      type: object
+                    from_reg:
+                      description: URL реестра, откуда получен модуль
+                      type: string
+                    id:
+                      title: ActMod_ID
+                      type: string
+                  title: ActMod
+                  type: object
+                type: array
+          description: Модули
+      tags: []
+  /node/module/rm/{mod}:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Удаление модуля с текущей ноды
+      parameters:
+        - description: ИД модуля
+          in: path
+          name: mod
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActServ_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Подключаемый модуль системы
+                properties:
+                  base64:
+                    description: Программный код модуля (Elixir => base64)
+                    type: string
+                  config_default:
+                    description: Конфигурация по умолчанию
+                    type: object
+                  from_reg:
+                    description: URL реестра, откуда получен модуль
+                    type: string
+                  id:
+                    title: ActMod_ID
+                    type: string
+                title: ActMod
+                type: object
+          description: Удалённый модуль
+      tags: []
+  /node/register/del/{eid}:
+    post:
+      callbacks: {}
+      deprecated: false
+      operationId: Удаление объекта типа Register с указанным ИД
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: Register_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Внешний подключаемый реестр модулей, конфигураций и энтити
+                properties:
+                  id:
+                    title: Register_ID
+                    type: string
+                  url:
+                    description: URL подключаемого реестра
+                    type: object
+                title: Register
+                type: object
+          description: Удалённый объект
+      tags: []
+  /node/register/list:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Список доступных объектов типа Register
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  description: Внешний подключаемый реестр модулей, конфигураций и энтити
+                  properties:
+                    id:
+                      title: Register_ID
+                      type: string
+                    url:
+                      description: URL подключаемого реестра
+                      type: object
+                  title: Register
+                  type: object
+                type: array
+          description: Массив объектов
+      tags: []
+  /node/register/put/{eid}:
+    post:
+      callbacks: {}
+      deprecated: false
+      operationId: Сохранение объекта типа Register с указанным ИД
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: Register_ID
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Внешний подключаемый реестр модулей, конфигураций и энтити
+              properties:
+                id:
+                  title: Register_ID
+                  type: string
+                url:
+                  description: URL подключаемого реестра
+                  type: object
+              title: Register
+              type: object
+        description: Объект
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: ИД объекта
+                title: Register_ID
+                type: string
+          description: Сохранённый ИД
+        '401':
+          content:
+            application/json:
+              schema:
+                description: ИД объекта
+                title: Register_ID
+                type: string
+          description: Не удалось сохранить объект с таким ИД
+      tags: []
+  /node/register/read/{eid}:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Получение объекта типа Register по его идентификатору
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: Register_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Внешний подключаемый реестр модулей, конфигураций и энтити
+                properties:
+                  id:
+                    title: Register_ID
+                    type: string
+                  url:
+                    description: URL подключаемого реестра
+                    type: object
+                title: Register
+                type: object
+          description: Объект
+      tags: []
+  /node/running:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Список запущеннеых сервисов
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  description: Запускаемый сервис системы
+                  properties:
+                    channels:
+                      description: Каналы сервиса (входные и выходные). Следует иметь ввиду, что порядок указания каналов может быть важен для модуля
+                      properties:
+                        in:
+                          description: Входные каналы
+                          items:
+                            description: Канал
+                            title: Channel
+                            type: string
+                          type: array
+                        out:
+                          description: Выходные каналы
+                          items:
+                            description: Канал
+                            title: Channel
+                            type: string
+                          type: array
+                      title: Service_channels
+                      type: object
+                    config:
+                      description: ИД используемой конфигурации (можно не указывать, тогда создастся автоматически)
+                      title: ActModConf_ID
+                      type: string
+                    config_data:
+                      description: Установленные параметры
+                      type: object
+                    id:
+                      title: ActServ_ID
+                      type: string
+                    module:
+                      description: ИД используемого модуля
+                      title: ActMod_ID
+                      type: string
+                  title: ActServ
+                  type: object
+                type: array
+          description: 'Выполняются сервисы:'
+      tags: []
+  /node/service/del/{eid}:
+    post:
+      callbacks: {}
+      deprecated: false
+      operationId: Удаление объекта типа ActServ с указанным ИД
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActServ_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Запускаемый сервис системы
+                properties:
+                  channels:
+                    description: Каналы сервиса (входные и выходные). Следует иметь ввиду, что порядок указания каналов может быть важен для модуля
+                    properties:
+                      in:
+                        description: Входные каналы
+                        items:
+                          description: Канал
+                          title: Channel
+                          type: string
+                        type: array
+                      out:
+                        description: Выходные каналы
+                        items:
+                          description: Канал
+                          title: Channel
+                          type: string
+                        type: array
+                    title: Service_channels
+                    type: object
+                  config:
+                    description: ИД используемой конфигурации (можно не указывать, тогда создастся автоматически)
+                    title: ActModConf_ID
+                    type: string
+                  config_data:
+                    description: Установленные параметры
+                    type: object
+                  id:
+                    title: ActServ_ID
+                    type: string
+                  module:
+                    description: ИД используемого модуля
+                    title: ActMod_ID
+                    type: string
+                title: ActServ
+                type: object
+          description: Удалённый объект
+      tags: []
+  /node/service/list:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Список доступных объектов типа ActServ
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  description: Запускаемый сервис системы
+                  properties:
+                    channels:
+                      description: Каналы сервиса (входные и выходные). Следует иметь ввиду, что порядок указания каналов может быть важен для модуля
+                      properties:
+                        in:
+                          description: Входные каналы
+                          items:
+                            description: Канал
+                            title: Channel
+                            type: string
+                          type: array
+                        out:
+                          description: Выходные каналы
+                          items:
+                            description: Канал
+                            title: Channel
+                            type: string
+                          type: array
+                      title: Service_channels
+                      type: object
+                    config:
+                      description: ИД используемой конфигурации (можно не указывать, тогда создастся автоматически)
+                      title: ActModConf_ID
+                      type: string
+                    config_data:
+                      description: Установленные параметры
+                      type: object
+                    id:
+                      title: ActServ_ID
+                      type: string
+                    module:
+                      description: ИД используемого модуля
+                      title: ActMod_ID
+                      type: string
+                  title: ActServ
+                  type: object
+                type: array
+          description: Массив объектов
+      tags: []
+  /node/service/put/{eid}:
+    post:
+      callbacks: {}
+      deprecated: false
+      operationId: Сохранение объекта типа ActServ с указанным ИД
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActServ_ID
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Запускаемый сервис системы
+              properties:
+                channels:
+                  description: Каналы сервиса (входные и выходные). Следует иметь ввиду, что порядок указания каналов может быть важен для модуля
+                  properties:
+                    in:
+                      description: Входные каналы
+                      items:
+                        description: Канал
+                        title: Channel
+                        type: string
+                      type: array
+                    out:
+                      description: Выходные каналы
+                      items:
+                        description: Канал
+                        title: Channel
+                        type: string
+                      type: array
+                  title: Service_channels
+                  type: object
+                config:
+                  description: ИД используемой конфигурации (можно не указывать, тогда создастся автоматически)
+                  title: ActModConf_ID
+                  type: string
+                config_data:
+                  description: Установленные параметры
+                  type: object
+                id:
+                  title: ActServ_ID
+                  type: string
+                module:
+                  description: ИД используемого модуля
+                  title: ActMod_ID
+                  type: string
+              title: ActServ
+              type: object
+        description: Объект
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: ИД объекта
+                title: ActServ_ID
+                type: string
+          description: Сохранённый ИД
+        '401':
+          content:
+            application/json:
+              schema:
+                description: ИД объекта
+                title: ActServ_ID
+                type: string
+          description: Не удалось сохранить объект с таким ИД
+      tags: []
+  /node/service/read/{eid}:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Получение объекта типа ActServ по его идентификатору
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActServ_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Запускаемый сервис системы
+                properties:
+                  channels:
+                    description: Каналы сервиса (входные и выходные). Следует иметь ввиду, что порядок указания каналов может быть важен для модуля
+                    properties:
+                      in:
+                        description: Входные каналы
+                        items:
+                          description: Канал
+                          title: Channel
+                          type: string
+                        type: array
+                      out:
+                        description: Выходные каналы
+                        items:
+                          description: Канал
+                          title: Channel
+                          type: string
+                        type: array
+                    title: Service_channels
+                    type: object
+                  config:
+                    description: ИД используемой конфигурации (можно не указывать, тогда создастся автоматически)
+                    title: ActModConf_ID
+                    type: string
+                  config_data:
+                    description: Установленные параметры
+                    type: object
+                  id:
+                    title: ActServ_ID
+                    type: string
+                  module:
+                    description: ИД используемого модуля
+                    title: ActMod_ID
+                    type: string
+                title: ActServ
+                type: object
+          description: Объект
+      tags: []
+  /node/start/{eid}:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Запуск указанного сервиса
+      parameters:
+        - description: ИД сервиса
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActServ_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  description: Запускаемый сервис системы
+                  properties:
+                    channels:
+                      description: Каналы сервиса (входные и выходные). Следует иметь ввиду, что порядок указания каналов может быть важен для модуля
+                      properties:
+                        in:
+                          description: Входные каналы
+                          items:
+                            description: Канал
+                            title: Channel
+                            type: string
+                          type: array
+                        out:
+                          description: Выходные каналы
+                          items:
+                            description: Канал
+                            title: Channel
+                            type: string
+                          type: array
+                      title: Service_channels
+                      type: object
+                    config:
+                      description: ИД используемой конфигурации (можно не указывать, тогда создастся автоматически)
+                      title: ActModConf_ID
+                      type: string
+                    config_data:
+                      description: Установленные параметры
+                      type: object
+                    id:
+                      title: ActServ_ID
+                      type: string
+                    module:
+                      description: ИД используемого модуля
+                      title: ActMod_ID
+                      type: string
+                  title: ActServ
+                  type: object
+                type: array
+          description: 'Выполняются сервисы:'
+      tags: []
+  /node/start_all:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Запустить все сервисы текущей ноды
+      parameters: []
+      responses:
+        '200':
+          content:
+            text/html:
+              schema:
+                description: OK
+                title: OK_response
+                type: string
+          description: Выполнен запуск всех сервисов
+      tags: []
+  /node/stop/{eid}:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Остановка указанного сервиса
+      parameters:
+        - description: ИД сервиса
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActServ_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  description: Запускаемый сервис системы
+                  properties:
+                    channels:
+                      description: Каналы сервиса (входные и выходные). Следует иметь ввиду, что порядок указания каналов может быть важен для модуля
+                      properties:
+                        in:
+                          description: Входные каналы
+                          items:
+                            description: Канал
+                            title: Channel
+                            type: string
+                          type: array
+                        out:
+                          description: Выходные каналы
+                          items:
+                            description: Канал
+                            title: Channel
+                            type: string
+                          type: array
+                      title: Service_channels
+                      type: object
+                    config:
+                      description: ИД используемой конфигурации (можно не указывать, тогда создастся автоматически)
+                      title: ActModConf_ID
+                      type: string
+                    config_data:
+                      description: Установленные параметры
+                      type: object
+                    id:
+                      title: ActServ_ID
+                      type: string
+                    module:
+                      description: ИД используемого модуля
+                      title: ActMod_ID
+                      type: string
+                  title: ActServ
+                  type: object
+                type: array
+          description: 'Выполняются сервисы:'
+      tags: []
+  /node/stop_all:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Остановить все сервисы текущей ноды
+      parameters: []
+      responses:
+        '200':
+          content:
+            text/html:
+              schema:
+                description: OK
+                title: OK_response
+                type: string
+          description: Все сервисы остановлены
+      tags: []
+  /reg/config/del/{eid}:
+    post:
+      callbacks: {}
+      deprecated: false
+      operationId: Удаление объекта типа ActModConf с указанным ИД (2)
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActModConf_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Конфигурация
+                properties:
+                  id:
+                    title: ActModConf_ID
+                    type: string
+                  params:
+                    description: Параметры
+                    type: object
+                title: ActModConf
+                type: object
+          description: Удалённый объект
+      tags: []
+  /reg/config/list:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Список доступных объектов типа ActModConf (2)
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  description: Конфигурация
+                  properties:
+                    id:
+                      title: ActModConf_ID
+                      type: string
+                    params:
+                      description: Параметры
+                      type: object
+                  title: ActModConf
+                  type: object
+                type: array
+          description: Массив объектов
+      tags: []
+  /reg/config/put/{eid}:
+    post:
+      callbacks: {}
+      deprecated: false
+      operationId: Сохранение объекта типа ActModConf с указанным ИД (2)
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActModConf_ID
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Конфигурация
+              properties:
+                id:
+                  title: ActModConf_ID
+                  type: string
+                params:
+                  description: Параметры
+                  type: object
+              title: ActModConf
+              type: object
+        description: Объект
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: ИД объекта
+                title: ActModConf_ID
+                type: string
+          description: Сохранённый ИД
+        '401':
+          content:
+            application/json:
+              schema:
+                description: ИД объекта
+                title: ActModConf_ID
+                type: string
+          description: Не удалось сохранить объект с таким ИД
+      tags: []
+  /reg/config/read/{eid}:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Получение объекта типа ActModConf по его идентификатору (2)
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActModConf_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Конфигурация
+                properties:
+                  id:
+                    title: ActModConf_ID
+                    type: string
+                  params:
+                    description: Параметры
+                    type: object
+                title: ActModConf
+                type: object
+          description: Объект
+      tags: []
+  /reg/module/del/{eid}:
+    post:
+      callbacks: {}
+      deprecated: false
+      operationId: Удаление объекта типа ActMod с указанным ИД
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActMod_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Подключаемый модуль системы
+                properties:
+                  base64:
+                    description: Программный код модуля (Elixir => base64)
+                    type: string
+                  config_default:
+                    description: Конфигурация по умолчанию
+                    type: object
+                  from_reg:
+                    description: URL реестра, откуда получен модуль
+                    type: string
+                  id:
+                    title: ActMod_ID
+                    type: string
+                title: ActMod
+                type: object
+          description: Удалённый объект
+      tags: []
+  /reg/module/list:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Список доступных объектов типа ActMod
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  description: Подключаемый модуль системы
+                  properties:
+                    base64:
+                      description: Программный код модуля (Elixir => base64)
+                      type: string
+                    config_default:
+                      description: Конфигурация по умолчанию
+                      type: object
+                    from_reg:
+                      description: URL реестра, откуда получен модуль
+                      type: string
+                    id:
+                      title: ActMod_ID
+                      type: string
+                  title: ActMod
+                  type: object
+                type: array
+          description: Массив объектов
+      tags: []
+  /reg/module/put/{eid}:
+    post:
+      callbacks: {}
+      deprecated: false
+      operationId: Сохранение объекта типа ActMod с указанным ИД
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActMod_ID
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Подключаемый модуль системы
+              properties:
+                base64:
+                  description: Программный код модуля (Elixir => base64)
+                  type: string
+                config_default:
+                  description: Конфигурация по умолчанию
+                  type: object
+                from_reg:
+                  description: URL реестра, откуда получен модуль
+                  type: string
+                id:
+                  title: ActMod_ID
+                  type: string
+              title: ActMod
+              type: object
+        description: Объект
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: ИД объекта
+                title: ActMod_ID
+                type: string
+          description: Сохранённый ИД
+        '401':
+          content:
+            application/json:
+              schema:
+                description: ИД объекта
+                title: ActMod_ID
+                type: string
+          description: Не удалось сохранить объект с таким ИД
+      tags: []
+  /reg/module/read/{eid}:
+    get:
+      callbacks: {}
+      deprecated: false
+      operationId: Получение объекта типа ActMod по его идентификатору
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            description: ИД объекта
+            title: ActMod_ID
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Подключаемый модуль системы
+                properties:
+                  base64:
+                    description: Программный код модуля (Elixir => base64)
+                    type: string
+                  config_default:
+                    description: Конфигурация по умолчанию
+                    type: object
+                  from_reg:
+                    description: URL реестра, откуда получен модуль
+                    type: string
+                  id:
+                    title: ActMod_ID
+                    type: string
+                title: ActMod
+                type: object
+          description: Объект
+      tags: []
+security: []
+servers:
+  - description: Неваляшка
+    url: http://localhost:4000
+    variables: {}
+tags: []

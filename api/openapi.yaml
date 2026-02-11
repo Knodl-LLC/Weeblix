@@ -1,0 +1,678 @@
+components:
+  responses: {}
+  schemas:
+    ActMod:
+      description: Подключаемый модуль системы
+      properties:
+        base64:
+          description: Программный код модуля (Elixir => base64)
+          type: string
+        config_default:
+          description: Конфигурация по умолчанию
+          type: object
+        from_reg:
+          description: URL реестра, откуда получен модуль
+          type: string
+        id:
+          title: ActMod_ID
+          type: string
+      title: ActMod
+      type: object
+    ActModConf:
+      description: Конфигурация
+      properties:
+        id:
+          title: ActModConf_ID
+          type: string
+        params:
+          description: Параметры
+          type: object
+      title: ActModConf
+      type: object
+    ActModConf_ID:
+      description: ИД используемой конфигурации (можно не указывать, тогда создастся автоматически)
+      title: ActModConf_ID
+      type: string
+    ActMod_ID:
+      description: ИД используемого модуля
+      title: ActMod_ID
+      type: string
+    ActServ:
+      description: Запускаемый сервис системы
+      properties:
+        channels:
+          description: Каналы сервиса (входные и выходные). Следует иметь ввиду, что порядок указания каналов может быть важен для модуля
+          properties:
+            in:
+              description: Входные каналы
+              items:
+                description: Канал
+                title: Channel
+                type: string
+              type: array
+            out:
+              description: Выходные каналы
+              items:
+                description: Канал
+                title: Channel
+                type: string
+              type: array
+          title: Service_channels
+          type: object
+        config:
+          description: ИД используемой конфигурации (можно не указывать, тогда создастся автоматически)
+          title: ActModConf_ID
+          type: string
+        config_data:
+          description: Установленные параметры
+          type: object
+        id:
+          title: ActServ_ID
+          type: string
+        module:
+          description: ИД используемого модуля
+          title: ActMod_ID
+          type: string
+      title: ActServ
+      type: object
+    ActServ_ID:
+      title: ActServ_ID
+      type: string
+    Channel:
+      description: Канал
+      title: Channel
+      type: string
+    OK_response:
+      description: OK
+      title: OK_response
+      type: string
+    Register:
+      description: Внешний подключаемый реестр модулей, конфигураций и энтити
+      properties:
+        id:
+          title: Register_ID
+          type: string
+        url:
+          description: URL подключаемого реестра
+          type: string
+      title: Register
+      type: object
+    Register_ID:
+      title: Register_ID
+      type: string
+    Service_channels:
+      description: Каналы сервиса (входные и выходные). Следует иметь ввиду, что порядок указания каналов может быть важен для модуля
+      properties:
+        in:
+          description: Входные каналы
+          items:
+            description: Канал
+            title: Channel
+            type: string
+          type: array
+        out:
+          description: Выходные каналы
+          items:
+            description: Канал
+            title: Channel
+            type: string
+          type: array
+      title: Service_channels
+      type: object
+info:
+  title: Неваляшка
+  version: '1.0'
+openapi: 3.0.0
+paths:
+  /node/config/del/{eid}:
+    post:
+      operationId: node_config_del
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActModConf'
+          description: Удалённый объект
+      summary: Удаление конфигурации
+  /node/config/list:
+    get:
+      operationId: node_config_list
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ActModConf'
+                type: array
+          description: Массив объектов
+      summary: Список конфигураций
+  /node/config/put/{eid}:
+    post:
+      operationId: node_config_put
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActModConf'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Сохранённый ИД
+        '401':
+          description: Не удалось сохранить объект
+      summary: Сохранение конфигурации
+  /node/config/read/{eid}:
+    get:
+      operationId: node_config_read
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActModConf'
+          description: Объект
+      summary: Получение конфигурации
+  /node/module/add/{reg}/{mod}:
+    get:
+      operationId: node_module_add
+      parameters:
+        - description: ИД реестра
+          in: path
+          name: reg
+          required: true
+          schema:
+            type: string
+        - description: ИД добавляемого модуля
+          in: path
+          name: mod
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActMod'
+          description: Добавленный модуль
+      summary: Добавление модуля из реестра
+  /node/module/cp/{modfr}/{modto}:
+    get:
+      operationId: node_module_cp
+      parameters:
+        - description: ИД модуля для копирования
+          in: path
+          name: modfr
+          required: true
+          schema:
+            type: string
+        - description: Новый ИД для копии модуля
+          in: path
+          name: modto
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActMod'
+          description: Скопированный модуль
+      summary: Копирование модуля
+  /node/module/list:
+    get:
+      operationId: node_module_list
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ActMod'
+                type: array
+          description: Модули
+      summary: Список модулей на ноде
+  /node/module/onreg/{reg}:
+    get:
+      operationId: node_module_onreg
+      parameters:
+        - description: ИД реестра
+          in: path
+          name: reg
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ActMod'
+                type: array
+          description: Модули
+      summary: Список модулей из реестра
+  /node/module/rm/{mod}:
+    get:
+      operationId: node_module_rm
+      parameters:
+        - description: ИД модуля
+          in: path
+          name: mod
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActMod'
+          description: Удалённый модуль
+      summary: Удаление модуля
+  /node/register/del/{eid}:
+    post:
+      operationId: node_register_del
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: Удалённый объект
+      summary: Удаление реестра
+  /node/register/list:
+    get:
+      operationId: node_register_list
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Register'
+                type: array
+          description: Массив объектов
+      summary: Список реестров
+  /node/register/put/{eid}:
+    post:
+      operationId: node_register_put
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Сохранённый ИД
+        '401':
+          description: Не удалось сохранить объект
+      summary: Сохранение реестра
+  /node/register/read/{eid}:
+    get:
+      operationId: node_register_read
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: Объект
+      summary: Получение реестра
+  /node/running:
+    get:
+      operationId: node_running
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ActServ'
+                type: array
+          description: Выполняются сервисы
+      summary: Список запущенных сервисов
+  /node/service/del/{eid}:
+    post:
+      operationId: node_service_del
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActServ'
+          description: Удалённый объект
+      summary: Удаление сервиса
+  /node/service/list:
+    get:
+      operationId: node_service_list
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ActServ'
+                type: array
+          description: Массив объектов
+      summary: Список сервисов
+  /node/service/put/{eid}:
+    post:
+      operationId: node_service_put
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActServ'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Сохранённый ИД
+        '401':
+          description: Не удалось сохранить объект
+      summary: Сохранение сервиса
+  /node/service/read/{eid}:
+    get:
+      operationId: node_service_read
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActServ'
+          description: Объект
+      summary: Получение сервиса
+  /node/start/{eid}:
+    get:
+      operationId: node_start
+      parameters:
+        - description: ИД сервиса
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ActServ'
+                type: array
+          description: Выполняются сервисы
+      summary: Запуск сервиса
+  /node/start_all:
+    get:
+      operationId: node_start_all
+      responses:
+        '200':
+          content:
+            text/html:
+              schema:
+                type: string
+          description: Выполнен запуск всех сервисов
+      summary: Запуск всех сервисов
+  /node/stop/{eid}:
+    get:
+      operationId: node_stop
+      parameters:
+        - description: ИД сервиса
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ActServ'
+                type: array
+          description: Выполняются сервисы
+      summary: Остановка сервиса
+  /node/stop_all:
+    get:
+      operationId: node_stop_all
+      responses:
+        '200':
+          content:
+            text/html:
+              schema:
+                type: string
+          description: Все сервисы остановлены
+      summary: Остановка всех сервисов
+  /reg/config/del/{eid}:
+    post:
+      operationId: reg_config_del
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActModConf'
+          description: Удалённый объект
+      summary: Удаление конфигурации из реестра
+  /reg/config/list:
+    get:
+      operationId: reg_config_list
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ActModConf'
+                type: array
+          description: Массив объектов
+      summary: Список конфигураций в реестре
+  /reg/config/put/{eid}:
+    post:
+      operationId: reg_config_put
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActModConf'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Сохранённый ИД
+        '401':
+          description: Не удалось сохранить объект
+      summary: Сохранение конфигурации в реестр
+  /reg/config/read/{eid}:
+    get:
+      operationId: reg_config_read
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActModConf'
+          description: Объект
+      summary: Получение конфигурации из реестра
+  /reg/module/del/{eid}:
+    post:
+      operationId: reg_module_del
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActMod'
+          description: Удалённый объект
+      summary: Удаление модуля из реестра
+  /reg/module/list:
+    get:
+      operationId: reg_module_list
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ActMod'
+                type: array
+          description: Массив объектов
+      summary: Список модулей в реестре
+  /reg/module/put/{eid}:
+    post:
+      operationId: reg_module_put
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActMod'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Сохранённый ИД
+        '401':
+          description: Не удалось сохранить объект
+      summary: Сохранение модуля в реестр
+  /reg/module/read/{eid}:
+    get:
+      operationId: reg_module_read
+      parameters:
+        - description: ИД
+          in: path
+          name: eid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActMod'
+          description: Объект
+      summary: Получение модуля из реестра
+servers:
+  - url: http://localhost:4000
+    description: Development server
