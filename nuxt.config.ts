@@ -30,6 +30,7 @@ export default defineNuxtConfig({
   },
 
   app: {
+    baseURL: '/frontend/',
     head: {
       title: 'Неваляшка - Управление системой',
       meta: [
