@@ -169,7 +169,9 @@
             allow-create
             placeholder="Добавьте входные каналы"
             style="width: 100%"
-          />
+          >
+            <el-option v-for="ch in servicesStore.allChannels" :key="ch" :label="ch" :value="ch" />
+          </el-select>
         </el-form-item>
 
         <el-form-item label="Выходные каналы">
@@ -180,7 +182,9 @@
             allow-create
             placeholder="Добавьте выходные каналы"
             style="width: 100%"
-          />
+          >
+            <el-option v-for="ch in servicesStore.allChannels" :key="ch" :label="ch" :value="ch" />
+          </el-select>
         </el-form-item>
       </el-form>
 

@@ -26,6 +26,12 @@ export const useServicesStore = defineStore('services', {
     },
     servicesCount: (state) => state.services.length,
     runningServicesCount: (state) => state.runningServices.length,
+    allChannels: (state) => [...new Set(
+        state.services.flatMap(srv => [
+            ...Array.from(srv.channels?.in || []),
+            ...Array.from(srv.channels?.out || [])
+        ])
+    )]
   },
 
   actions: {
