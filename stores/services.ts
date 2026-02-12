@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useConfigsStore } from './configs'
 import type { ActServ } from '~/utils/api-client'
 
 export interface ServicesState {
@@ -66,8 +67,10 @@ export const useServicesStore = defineStore('services', {
     async saveService(id: string, service: ActServ) {
       try {
         const { api } = useApi()
+        const configsStore = useConfigsStore()
         await api.saveService(id, service)
         await this.fetchServices()
+        await configsStore.fetchConfigs()
       } catch (error) {
         console.error('Failed to save service:', error)
         throw error
