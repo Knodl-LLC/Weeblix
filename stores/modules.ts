@@ -74,13 +74,23 @@ export const useModulesStore = defineStore('modules', {
       this.selectedModule = module
     },
 
-    decodeModuleCode(base64Code: string): string {
-      try {
-        return atob(base64Code)
-      } catch (error) {
-        console.error('Failed to decode module code:', error)
-        return 'Ошибка декодирования кода модуля'
-      }
-    },
+      decodeModuleCode(base64Code: string): string {
+          try {
+              // Step 1: Use atob() to get raw bytes from Base64
+              const binaryString = atob(base64Code);
+
+              // Step 2: Convert binary string to UTF-8 using TextDecoder
+              const bytes = new Uint8Array(binaryString.length);
+              for (let i = 0; i < binaryString.length; i++) {
+                  bytes[i] = binaryString.charCodeAt(i);
+              }
+
+              const decoder = new TextDecoder('utf-8');
+              return decoder.decode(bytes);
+          } catch (error) {
+              console.error('Failed to decode module code:', error)
+              return 'Ошибка декодирования кода модуля'
+          }
+      },
   },
 })
