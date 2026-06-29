@@ -30,11 +30,15 @@
             <el-tag v-else type="info">Нет</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Действия" width="300" fixed="right">
+        <el-table-column label="Действия" width="380" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="handleViewCode(row)">
               <el-icon><View /></el-icon>
               Код
+            </el-button>
+            <el-button size="small" type="warning" @click="handleEditCode(row)">
+              <el-icon><Edit /></el-icon>
+              Редактировать
             </el-button>
             <el-button size="small" type="primary" @click="handleCopy(row)">
               <el-icon><CopyDocument /></el-icon>
@@ -76,6 +80,47 @@
       </div>
     </el-dialog>
 
+    <!-- Code Editor Dialog -->
+    <el-dialog
+      v-model="editDialogVisible"
+      title="Редактирование кода модуля"
+      width="85%"
+      :close-on-click-modal="false"
+      @close="handleEditClose"
+    >
+      <div v-if="editingModule">
+        <el-descriptions :column="2" border class="mb-4">
+          <el-descriptions-item label="ID модуля">{{ editingModule.id }}</el-descriptions-item>
+          <el-descriptions-item label="Реестр">
+            {{ editingModule.from_reg || 'Локальный' }}
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <el-divider>Программный код (Elixir)</el-divider>
+
+        <div class="code-editor-container">
+          <el-input
+            v-model="editCode"
+            type="textarea"
+            :rows="25"
+            placeholder="Введите код модуля на Elixir..."
+            class="code-editor"
+            resize="vertical"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="editDialogVisible = false">Отмена</el-button>
+        <el-button
+          type="primary"
+          @click="handleSaveCode"
+          :loading="saving"
+        >
+          Сохранить
+        </el-button>
+      </template>
+    </el-dialog>
+
     <!-- Copy Module Dialog -->
     <el-dialog
       v-model="copyDialogVisible"
@@ -113,6 +158,7 @@ import { ref, reactive, computed } from 'vue'
 import {
   Refresh,
   View,
+  Edit,
   CopyDocument,
   Delete,
 } from '@element-plus/icons-vue'
@@ -127,8 +173,12 @@ const { showSuccess, showError } = useNotification()
 const { confirmDelete } = useConfirm()
 
 const codeDialogVisible = ref(false)
+const editDialogVisible = ref(false)
 const copyDialogVisible = ref(false)
 const selectedModule = ref<ActMod | null>(null)
+const editingModule = ref<ActMod | null>(null)
+const editCode = ref('')
+const saving = ref(false)
 
 const copyForm = reactive({
   from: '',
@@ -152,6 +202,39 @@ const handleRefresh = async () => {
 const handleViewCode = (module: ActMod) => {
   selectedModule.value = module
   codeDialogVisible.value = true
+}
+
+const handleEditCode = (module: ActMod) => {
+  editingModule.value = module
+  editCode.value = module.base64
+    ? modulesStore.decodeModuleCode(module.base64)
+    : ''
+  editDialogVisible.value = true
+}
+
+const handleEditClose = () => {
+  editingModule.value = null
+  editCode.value = ''
+}
+
+const handleSaveCode = async () => {
+  if (!editingModule.value) return
+
+  saving.value = true
+  try {
+    const encodedCode = modulesStore.encodeModuleCode(editCode.value)
+    const updatedModule: ActMod = {
+      ...editingModule.value,
+      base64: encodedCode,
+    }
+    await modulesStore.saveModule(editingModule.value.id!, updatedModule)
+    showSuccess(`Код модуля "${editingModule.value.id}" сохранён`)
+    editDialogVisible.value = false
+  } catch (error: any) {
+    showError(error.message || 'Не удалось сохранить код модуля')
+  } finally {
+    saving.value = false
+  }
 }
 
 const handleCopy = (module: ActMod) => {
@@ -227,6 +310,21 @@ onMounted(async () => {
     line-height: 1.5;
     white-space: pre-wrap;
     word-wrap: break-word;
+  }
+}
+
+.code-editor-container {
+  .code-editor {
+    :deep(.el-textarea__inner) {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      padding: 16px;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      border-radius: 4px;
+      min-height: 400px;
+    }
   }
 }
 

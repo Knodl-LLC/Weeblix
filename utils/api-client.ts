@@ -119,6 +119,10 @@ export class NevalyashkaApi {
     return this.client.get<ActMod>(`/node/module/cp/${modFrom}/${modTo}`)
   }
 
+  async saveModule(modId: string, module: ActMod): Promise<string> {
+    return this.client.post<string>(`/node/module/put/${modId}`, module)
+  }
+
   // Services
   async getServices(): Promise<ActServ[]> {
     return this.client.get<ActServ[]>('/node/service/list')

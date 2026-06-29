@@ -70,6 +70,32 @@ export const useModulesStore = defineStore('modules', {
       }
     },
 
+    async saveModule(modId: string, module: ActMod) {
+      try {
+        const { api } = useApi()
+        await api.saveModule(modId, module)
+        await this.fetchModules()
+      } catch (error) {
+        console.error('Failed to save module:', error)
+        throw error
+      }
+    },
+
+    encodeModuleCode(code: string): string {
+      try {
+        const encoder = new TextEncoder()
+        const bytes = encoder.encode(code)
+        let binaryString = ''
+        for (let i = 0; i < bytes.length; i++) {
+          binaryString += String.fromCharCode(bytes[i])
+        }
+        return btoa(binaryString)
+      } catch (error) {
+        console.error('Failed to encode module code:', error)
+        return ''
+      }
+    },
+
     selectModule(module: ActMod | null) {
       this.selectedModule = module
     },
